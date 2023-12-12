@@ -1,1 +1,12 @@
 .DS_Store
+
+# rust
+target
+
+# LaTeX
+_minted*
+*.aux
+*.bbl
+*.log
+*.out
+*.synctex.gz

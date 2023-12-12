@@ -29,19 +29,24 @@
 \begin{document}
 
 \hwtitle
-  {Assignment 1}
-  {Will Crichton (wcrichto)} %% REPLACE THIS WITH YOUR NAME/ID
+{Assignment 1}
+{He Anyang} %% REPLACE THIS WITH YOUR NAME/ID
 
 \problem{Problem 1}
 
 Part 1:
 
 \begin{alignat*}{1}
-\msf{Property}~p ::= \qamp \varepsilon \\
-\mid \qamp \ldots \\
-\\
-\msf{Schema}~\tau ::= \qamp \tnum \prop{p} \\
-\mid \qamp \ldots
+  \msf{Property}~p ::= \qamp \varepsilon                                       \\
+  \mid \qamp >n \mid\ =n \mid\ <n                                              \\
+  \mid \qamp =s                                                                \\
+  \mid \qamp (p)                                                               \\
+  \mid \qamp p_1 \vee p_2 \mid p_1 \wedge p_2                                  \\
+  \\
+  \msf{Schema}~\tau ::= \qamp \tnum \prop{p} \mid\ \tstr \prop{p} \mid\ \tbool \\
+  % Lists can only have elements of a single schema, so there is no *
+  \mid \qamp [\tau]                                                            \\
+  \mid \qamp \{(s:\tau)^*\}                                                    \\
 \end{alignat*}
 
 Part 2:
@@ -51,12 +56,35 @@ Part 2:
 % space out multiple assumptions.
 \begin{mathpar}
 
-\ir{S-Bool-False}{\ }{\matches{\falset}{\tbool}}
+  \ir{S-Bool-False}{\ }{\matches{\falset}{\tbool}}
 
-\ir{S-Bool-True}{\ }{\matches{\truet}{\tbool}}
+  \ir{S-Bool-True}{\ }{\matches{\truet}{\tbool}}
 
-% Inference rules go here
+  % Inference rules go here
+  \ir{S-String-Terminate}{\ }{\matches{s}{\tstr \prop{\varepsilon} } }
 
+  \ir{S-Number-Terminate}{\ }{\matches{n}{\tnum \prop{\varepsilon} } }
+
+  \ir{S-String-Equal}{s=s_0}{\matches{s}{\tstr \prop{=s_0}}}
+
+  \ir{S-Number-Equal}{n=n_0}{\matches{n}{\tnum \prop{=n_0}}}
+
+  \ir{S-Number-Greater}{n>n_0}{\matches{n}{\tnum \prop{>n_0}}}
+
+  \ir{S-Number-Lesser}{n<n_0}{\matches{n}{\tnum \prop{<n_0}}}
+
+  \ir{S-String-And}{\matches{s}{\tstr \prop{p_1}}\ \matches{s}{\tstr \prop{p_2}}}{\matches{s}{\tstr \prop{p_1\wedge p_2}}}
+
+  % assume that $p_1 \vee p_2 = p_2 \vee p_1$
+  \ir{S-String-Or}{\matches{s}{\tstr \prop{p_1}}}{\matches{s}{\tstr \prop{p_1\vee p_2}}}
+
+  \ir{S-Number-And}{\matches{n}{\tnum \prop{p_1}}\ \matches{n}{\tnum \prop{p_2}}}{\matches{n}{\tnum \prop{p_1\wedge p_2}}}
+
+  \ir{S-Number-Or}{\matches{n}{\tnum \prop{p_1}}}{\matches{n}{\tnum \prop{p_1\vee p_2}}}
+
+  \ir{S-List}{\matches{\forall i=0 \dots |j| - 1.\ j_i}{\tau} }{\matches{[j^*]}{[\tau]} }
+
+  \ir{S-Dict}{\matches{\forall s'\in s.\ j_{s'} }{\tau_{s'} } }{\matches{ \{(s:j)^*\} }{ \{(s:\tau)^*\} } }
 \end{mathpar}
 
 \problem{Problem 2}
@@ -64,19 +92,66 @@ Part 2:
 Part 1:
 
 \begin{mathpar}
-% Inference rules go here
+  % Inference rules go here
+  \ir{A-Terminate}{\steps{a}{\varepsilon} }{\steps{(a,j)}{(\varepsilon,j)} }
+
+  \ir{A-Dict}{\steps{a}{.s'a'} \quad \steps{j}{\{(s: j)^*\}} \quad s'\in s}{\steps{ (a,j) }{ (a',j_{s'}) } }
+
+  \ir{A-Index}{\steps{a}{[n]a'} \quad j=[\dots,j_n,\dots] }{\steps{ (a,j) }{ (a',j_n) } }
+
+  \ir{A-Map}{\steps{a}{|a'} \quad j=[\dots,j_n,\dots] \quad \evals{(a',j_n)}{(\varepsilon,j'_n)} }{\steps{ (a,j) }{ (\varepsilon,[\dots,j'_n,\dots]) } }
 \end{mathpar}
 
 Part 2:
 
 \begin{mathpar}
-% Inference rules go here
+  % Inference rules go here
+  \ir{V-Terminate}{\ }{\matches{\varepsilon}{\tau} }
+
+  \ir{V-Dict}{\steps{a}{.s'a'} \quad \matches{a'}{\tau} }{\matches{a}{ \{s':\tau,\dots\} } }
+
+  \ir{V-Index}{\steps{a}{[n]a'} \quad \matches{a'}{\tau} }{\matches{a}{[\tau]} }
+
+  \ir{V-Map}{\steps{a}{|a'} \quad \matches{a'}{\tau} }{\matches{a}{[\tau]} }
 \end{mathpar}
 
-\textit{Accessor safety}: for all $a, j, \tau$, if $\matches{a}{\tau}$ and $\matches{j}{\tau}$, then there exists a $j'$ such that $\evals{(a, j)}{\aeps, j'}$.
+\textit{Accessor safety}: for all $a, j, \tau$, if $\matches{a}{\tau}$ and $\matches{j}{\tau}$, then there exists a $j'$ such that $\evals{(a, j)}{(\aeps, j')}$.
 
 \begin{proof}
-% Proof goes here.
+  \
+  % Proof goes here.
+  \begin{enumerate}
+    \item If $a=\varepsilon$, by V-Terminate, for all $\tau$, $\matches{a}{\tau}$.
+
+          By A-Terminate, $\steps{(a,j)}{(\varepsilon,j)}$ holds for all $\matches{j}{\tau}$, therefore the theorem holds for $a=\varepsilon$.
+    \item Suppose that $a=.s'a'$, and for all $a',j,\tau'$, if $\matches{a'}{\tau'}$ and $\matches{j}{\tau'}$, then there exists $j'$ such that $\evals{(a',j)}{(\varepsilon,j')}$.
+
+          By V-Dict, $\matches{a}{ \{s':\tau',\dots\} }$ (which means $\matches{a}{\tau''}$ for all $\tau''=\{(s:\tau)^*\}$ such that $s' \in s$ and $\tau_{s'}=\tau'$).
+
+          For all $\matches{j}{ \{s':\tau',\dots\} }$, by inversion lemma and S-Dict, $j=\{(s:j)^*\}$ and $\matches{j_{s'}}{\tau_{s'}}=\tau'$.
+
+          Because $\matches{j_{s'}}{\tau'}$, by assumption, there exists $j'$ such that $\evals{(a',j_{s'})}{(\varepsilon,j')}$.
+
+          Because $j=\{(s:j)^*\}$, $s'\in s$, by A-Dict, $\steps{(a,j)}{(a',j_{s'})}$. Therefore $\evals{(a,j)}{(\varepsilon,j')}$
+    \item Suppose that $a=[n]a'$, and for all $a',j,\tau'$, if $\matches{a'}{\tau'}$ and $\matches{j}{\tau'}$, then there exists $j'$ such that $\evals{(a',j)}{(\varepsilon,j')}$.
+
+          By V-Index, $\matches{a}{[\tau']}$.
+
+          For all $\matches{j}{[\tau']}$, by inversion lemma and S-List, $j=[\dots,j_n,\dots]$ and $\matches{j_n}{\tau'}$.
+
+          By assumption, there exists $j'$ such that $\evals{(a',j_n)}{(\varepsilon,j')}$.
+
+          Because $j=[\dots,j_n,\dots]$, by A-Index, $\steps{(a,j)}{(a',j_n)}$. Therefore $\evals{(a,j)}{(\varepsilon,j')}$.
+    \item Suppose that $a=|a'$, and for all $a',j,\tau'$, if $\matches{a'}{\tau'}$ and $\matches{j}{\tau'}$, then there exists $j'$ such that $\evals{(a',j)}{(\varepsilon,j')}$.
+
+          By V-Map, $\matches{a}{[\tau']}$.
+
+          For all $\matches{j}{[\tau']}$, by inversion lemma and S-List, $j=[\dots,j_n,\dots]$, and for all $n$, $\matches{j_n}{\tau'}$.
+
+          By assumption, for all $n$, exists $j_n'$ such that $\evals{(a',j_n)}{(\varepsilon,j_n')}$.
+
+          Because $j=[\dots,j_n,\dots]$, $\evals{(a',j_n)}{(\varepsilon,j_n')}$, by A-Map, $\evals{(a,j)}{(\varepsilon,[\dots,j_n',\dots])}$
+  \end{enumerate}
 \end{proof}
 
 \end{document}
