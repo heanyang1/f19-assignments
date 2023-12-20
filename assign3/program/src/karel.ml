@@ -1,4 +1,3 @@
-open Core
 open Karel_impl
 
 let run_problem1 () =
@@ -40,7 +39,6 @@ let run_problem3 m n =
 
 
 let main () =
-  let open Command.Param in
   let open Command.Let_syntax in
   Command.basic
     ~summary:"NGraml generator"
@@ -54,7 +52,7 @@ let main () =
         else if problem = "problem3" then run_problem3 m n
         else Printf.printf "Error: first argument must be 'problem1' or 'problem3'"
     ]
-  |> Command.run
+  |> Command_unix.run
 
 
 

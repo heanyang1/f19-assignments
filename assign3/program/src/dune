@@ -1,0 +1,5 @@
+(executables
+ (names ngram karel)
+ (libraries core core_unix.command_unix)
+ (preprocess
+  (pps ppx_let ppx_here)))

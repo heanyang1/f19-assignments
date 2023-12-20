@@ -4,12 +4,12 @@ open Ngram_impl
 let main () =
 
   (* Run the random generator over the input text *)
-  let run (filepath : string) (ngram : int) (nwords : int) =
+  let run1 (filepath : string) (ngram : int) (nwords : int) =
     (* Read input file *)
     let contents = In_channel.read_all filepath in
 
     (* Tokenize file contents *)
-    let l = String.split contents ' ' in
+    let l = String.split contents ~on:' ' in
     let l = List.filter_map l ~f:(fun s ->
       let s' = String.strip s in
       if String.length s' = 0 then None else Some s')
@@ -27,7 +27,7 @@ let main () =
     Printf.printf "%s" (String.concat ~sep:" " str)
   in
 
-  let open Command.Param in
+  (* let open Command.Param in *)
   let open Command.Let_syntax in
   Command.basic
     ~summary:"NGraml generator"
@@ -35,8 +35,8 @@ let main () =
       let filepath = anon ("filepath" %: string)
       and ngram = flag "ngram" (optional_with_default 3 int) ~doc:"Size of N-grams to analyze"
       and nwords = flag "nwords" (optional_with_default 20 int) ~doc:"Number of words to generate" in
-      fun () -> run filepath ngram nwords
+      fun () -> run1 filepath ngram nwords
     ]
-  |> Command.run
+  |> Command_unix.run
 
 let () = main ()
