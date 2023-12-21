@@ -177,8 +177,10 @@ let checkers_algo : instruction list =
                     [
                       If
                         ( NoBeepersPresent,
-                          [ Move; PutBeeper; TurnLeft; TurnLeft; TurnLeft ],
-                          [ Move; TurnLeft; TurnLeft; TurnLeft ] );
+                          [
+                            Move; TurnLeft; TurnLeft; TurnLeft; Move; PutBeeper;
+                          ],
+                          [ Move; PutBeeper; TurnLeft; TurnLeft; TurnLeft ] );
                     ],
                     [] );
               ],
@@ -189,8 +191,8 @@ let checkers_algo : instruction list =
                     [
                       If
                         ( NoBeepersPresent,
-                          [ Move; PutBeeper; TurnLeft ],
-                          [ Move; TurnLeft ] );
+                          [ Move; TurnLeft; Move; PutBeeper ],
+                          [ Move; PutBeeper; TurnLeft ] );
                     ],
                     [] );
               ] );
