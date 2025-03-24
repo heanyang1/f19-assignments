@@ -1,4 +1,3 @@
-
 \documentclass[11pt]{article}
 
 \input{../../tex/defs.tex}
@@ -30,7 +29,7 @@
 
 \hwtitle
 {Assignment 1}
-{He Anyang} %% REPLACE THIS WITH YOUR NAME/ID
+{Anyang He (heanyang1)} %% REPLACE THIS WITH YOUR NAME/ID
 
 \problem{Problem 1}
 
@@ -75,7 +74,7 @@ Part 2:
 
   \ir{S-String-And}{\matches{s}{\tstr \prop{p_1}}\ \matches{s}{\tstr \prop{p_2}}}{\matches{s}{\tstr \prop{p_1\wedge p_2}}}
 
-  % assume that $p_1 \vee p_2 = p_2 \vee p_1$
+  % assume that \(p_1 \vee p_2 = p_2 \vee p_1\)
   \ir{S-String-Or}{\matches{s}{\tstr \prop{p_1}}}{\matches{s}{\tstr \prop{p_1\vee p_2}}}
 
   \ir{S-Number-And}{\matches{n}{\tnum \prop{p_1}}\ \matches{n}{\tnum \prop{p_2}}}{\matches{n}{\tnum \prop{p_1\wedge p_2}}}
@@ -93,13 +92,17 @@ Part 1:
 
 \begin{mathpar}
   % Inference rules go here
-  \ir{A-Terminate}{\steps{a}{\varepsilon} }{\steps{(a,j)}{(\varepsilon,j)} }
 
-  \ir{A-Dict}{\steps{a}{.s'a'} \quad \steps{j}{\{(s: j)^*\}} \quad s'\in s}{\steps{ (a,j) }{ (a',j_{s'}) } }
+  % I use val to represent terminate state here
+  \ir{A-Terminate}{ }{ (\varepsilon,j) \val{} }
 
-  \ir{A-Index}{\steps{a}{[n]a'} \quad j=[\dots,j_n,\dots] }{\steps{ (a,j) }{ (a',j_n) } }
+  \ir{A-Dict}{j=\{s':j', \ldots\}}{\steps{ (.sa,j) }{ (a,j') } }
 
-  \ir{A-Map}{\steps{a}{|a'} \quad j=[\dots,j_n,\dots] \quad \evals{(a',j_n)}{(\varepsilon,j'_n)} }{\steps{ (a,j) }{ (\varepsilon,[\dots,j'_n,\dots]) } }
+  \ir{A-Index}{j=[\dots,j_n,\dots] }{\steps{ ([n]a,j) }{ (a',j_n) } }
+
+  \ir{A-Map-Empty}{ }{\steps{(|\varepsilon,j)}{(\varepsilon,j)}}
+
+  \ir{A-Map}{\forall n = 0 \ldots |j| - 1. \ \steps{(a,j_n)}{(a',j'_n)} }{\steps{ (|a,j) }{ (|a',[\dots,j'_n,\dots]) } }
 \end{mathpar}
 
 Part 2:
@@ -108,49 +111,80 @@ Part 2:
   % Inference rules go here
   \ir{V-Terminate}{\ }{\matches{\varepsilon}{\tau} }
 
-  \ir{V-Dict}{\steps{a}{.s'a'} \quad \matches{a'}{\tau} }{\matches{a}{ \{s':\tau,\dots\} } }
+  \ir{V-Dict}{\matches{a}{\tau} }{\matches{.sa}{ \{s:\tau,\dots\} } }
 
-  \ir{V-Index}{\steps{a}{[n]a'} \quad \matches{a'}{\tau} }{\matches{a}{[\tau]} }
+  \ir{V-Index}{\matches{a}{\tau} }{\matches{[n]a}{[\tau]} }
 
-  \ir{V-Map}{\steps{a}{|a'} \quad \matches{a'}{\tau} }{\matches{a}{[\tau]} }
+  \ir{V-Map}{\matches{a}{\tau} }{\matches{|a}{[\tau]} }
 \end{mathpar}
 
-\textit{Accessor safety}: for all $a, j, \tau$, if $\matches{a}{\tau}$ and $\matches{j}{\tau}$, then there exists a $j'$ such that $\evals{(a, j)}{(\aeps, j')}$.
+I made a stronger claim here so that the V-Map part can be proved clearly. The idea is that any object with the same type can be accessed in the same way.
+
+\textit{(Strong) Accessor safety}: for all \(a, \tau\) such that \(\matches{a}{\tau}\), there exists accessors \(a_1, a_2, \ldots, a_k\) such that \(a_1 = a, a_k = \varepsilon\) and for all \(\matches{j}{\tau}\), then there exists objects \(j_1, j_2, \ldots, j_k\) such that \(j_1=j\),
+\begin{equation}\label{eq_steps}
+  \steps{(a_1,j_1)}{}\steps{(a_2,j_2)}{}\ldots\steps{}{(a_k,j_k)}.
+\end{equation}
 
 \begin{proof}
   \
   % Proof goes here.
   \begin{enumerate}
-    \item If $a=\varepsilon$, by V-Terminate, for all $\tau$, $\matches{a}{\tau}$.
+    \item If \(a=\varepsilon\), by V-Terminate, for all \(\tau\), \(\matches{a}{\tau}\).
 
-          By A-Terminate, $\steps{(a,j)}{(\varepsilon,j)}$ holds for all $\matches{j}{\tau}$, therefore the theorem holds for $a=\varepsilon$.
-    \item Suppose that $a=.s'a'$, and for all $a',j,\tau'$, if $\matches{a'}{\tau'}$ and $\matches{j}{\tau'}$, then there exists $j'$ such that $\evals{(a',j)}{(\varepsilon,j')}$.
+          For every \(j\), define \(a_1=a=\varepsilon, j_1=j\). Because \((a,j)=(a_1,j_1)=(\varepsilon,j_1)\), therefore the theorem holds for \(a=\varepsilon\).
+    \item Suppose that \(a=.s'a'\), \(\matches{a'}{\tau'}\), there exists accessors \(a_1, a_2, \ldots, a_k\) such that \(a_1 = a', a_k = \varepsilon\) and for all \(\matches{j}{\tau'}\), there exists objects \(j_1, j_2, \ldots, j_k\) such that \(j_1=j\) and equation (\ref{eq_steps}) holds.
 
-          By V-Dict, $\matches{a}{ \{s':\tau',\dots\} }$ (which means $\matches{a}{\tau''}$ for all $\tau''=\{(s:\tau)^*\}$ such that $s' \in s$ and $\tau_{s'}=\tau'$).
+          By V-Dict, \(\matches{a}{ \{s':\tau',\dots\} }\) (which means \(\matches{a}{\{(s:\tau)^*\}}\) such that \(s' \in s\) and \(\tau_{s'}=\tau'\)).
 
-          For all $\matches{j}{ \{s':\tau',\dots\} }$, by inversion lemma and S-Dict, $j=\{(s:j)^*\}$ and $\matches{j_{s'}}{\tau_{s'}}=\tau'$.
+          For all \(\matches{j}{ \{s':\tau',\dots\} }\), by inversion lemma and S-Dict, \(j=\{(s:j)^*\}\) and \(\matches{j_{s'}}{\tau_{s'}}=\tau'\).
 
-          Because $\matches{j_{s'}}{\tau'}$, by assumption, there exists $j'$ such that $\evals{(a',j_{s'})}{(\varepsilon,j')}$.
+          Because \(\matches{j_{s'}}{\tau'}\), by inductive hypothesis, there exists objects \(j_{s'}^{(1)},j_{s'}^{(2)},\ldots,j_{s'}^{(k)}\) such that \(j_{s'}=j_{s'}^{(1)}\),
+          \[\steps{(a_1,j_{s'}^{(1)})}{}\steps{(a_2,j_{s'}^{(2)})}{}\ldots\steps{}{(a_k,j_{s'}^{(k)})}.\]
 
-          Because $j=\{(s:j)^*\}$, $s'\in s$, by A-Dict, $\steps{(a,j)}{(a',j_{s'})}$. Therefore $\evals{(a,j)}{(\varepsilon,j')}$
-    \item Suppose that $a=[n]a'$, and for all $a',j,\tau'$, if $\matches{a'}{\tau'}$ and $\matches{j}{\tau'}$, then there exists $j'$ such that $\evals{(a',j)}{(\varepsilon,j')}$.
+          Because \(j=\{(s:j)^*\}\), \(s'\in s\), by A-Dict, \(\steps{(a,j)}{(a',j_{s'})}=(a_1,j_{s'}^{(1)})\).
+          
+          Therefore the theorem holds for \(a=.s'a'\) where \(a, a_1, a_2, \ldots, a_k\) described above is the set of accessors that satisfies the condition.
+    \item Suppose that \(a=[n]a'\), \(\matches{a'}{\tau'}\), and for all \(\matches{j}{\tau'}\), there exists accessors \(a_1, a_2, \ldots, a_k\) such that \(a_1 = a', a_k = \varepsilon\) and for all \(\matches{j}{\tau'}\), then there exists objects \(j_1, j_2, \ldots, j_k\) such that \(j_1=j\) and equation (\ref{eq_steps}) holds.
 
-          By V-Index, $\matches{a}{[\tau']}$.
+          By V-Index, \(\matches{a}{[\tau']}\).
 
-          For all $\matches{j}{[\tau']}$, by inversion lemma and S-List, $j=[\dots,j_n,\dots]$ and $\matches{j_n}{\tau'}$.
+          For all \(\matches{j}{[\tau']}\), by inversion lemma and S-List, \(j=[\dots,j_n,\dots]\) and \(\matches{j_n}{\tau'}\).
 
-          By assumption, there exists $j'$ such that $\evals{(a',j_n)}{(\varepsilon,j')}$.
+          By inductive hypothesis, there exists objects \(j_{n}^{(1)},j_{n}^{(2)},\ldots,j_{n}^{(k)}\) such that \(j_{n}=j_{n}^{(1)}\),
+          \[\steps{(a_1,j_{n}^{(1)})}{}\steps{(a_2,j_{n}^{(2)})}{}\ldots\steps{}{(a_k,j_{n}^{(k)})}.\]
 
-          Because $j=[\dots,j_n,\dots]$, by A-Index, $\steps{(a,j)}{(a',j_n)}$. Therefore $\evals{(a,j)}{(\varepsilon,j')}$.
-    \item Suppose that $a=|a'$, and for all $a',j,\tau'$, if $\matches{a'}{\tau'}$ and $\matches{j}{\tau'}$, then there exists $j'$ such that $\evals{(a',j)}{(\varepsilon,j')}$.
+          Because \(j=[\dots,j_n,\dots]\), by A-Index, \(\steps{(a,j)}{(a',j_n)}=(a_1,j_n^{(1)})\).
 
-          By V-Map, $\matches{a}{[\tau']}$.
+          Therefore the theorem holds for \(a=[n]a'\) where \(a, a_1, a_2, \ldots, a_k\) described above is the set of accessors that satisfies the condition.
+    
+    \item If \(a=|\varepsilon\), by V-Terminate, for every \(\tau\), \(\matches{\varepsilon}{\tau}\).
+    
+          By V-Map, for every \(\tau\), \(a=\matches{|\varepsilon}{[\tau]}\).
+    
+          By A-Map-Empty, for every \(\tau\), for every \(j\) such that \(\matches{j}{[\tau]}\), \((a,j)=\steps{(|\varepsilon,j)}{(\varepsilon,j)}\).
+    
+          Therefore the theorem holds for \(a=|e\).
 
-          For all $\matches{j}{[\tau']}$, by inversion lemma and S-List, $j=[\dots,j_n,\dots]$, and for all $n$, $\matches{j_n}{\tau'}$.
+    \item Suppose that \(a=|a'\), \(\matches{a'}{\tau'}\), there exists accessors \(a_1, a_2, \ldots, a_k\) such that \(a_1 = a', a_k = \varepsilon\) and for all \(\matches{j}{\tau'}\), then there exists objects \(j_1, j_2, \ldots, j_k\) such that \(j_1=j\) and equation (\ref{eq_steps}) holds.
+    
+          We claim that \(|a_1, |a_2, \ldots, |a_k, \varepsilon\) is the accessors that makes the theorem hold for \(a=|a'\).
 
-          By assumption, for all $n$, exists $j_n'$ such that $\evals{(a',j_n)}{(\varepsilon,j_n')}$.
+          By V-Map, \(\matches{a}{[\tau']}\). For every \(\matches{j}{[\tau']}\), we need to find the objects \(j^{(1)},j^{(2)},\ldots,j^{(k+1)}\) such that
+          \begin{equation}\label{eq_map}
+            (a,j)=\steps{(|a_1,j^{(1)})}{}\steps{(|a_2,j^{(2)})}{}\ldots\steps{}{(|a_k,j^{(k)})}\steps{}{(\varepsilon,j^{(k+1)})}.
+          \end{equation}
 
-          Because $j=[\dots,j_n,\dots]$, $\evals{(a',j_n)}{(\varepsilon,j_n')}$, by A-Map, $\evals{(a,j)}{(\varepsilon,[\dots,j_n',\dots])}$
+          By inductive hypothesis, for all \(n\), there exists objects \(j_{n}^{(1)},j_{n}^{(2)},\ldots,j_{n}^{(k)}\) such that \(j_{n}=j_{n}^{(1)}\),
+          \[\steps{(a_1,j_{n}^{(1)})}{}\steps{(a_2,j_{n}^{(2)})}{}\ldots\steps{}{(a_k,j_{n}^{(k)})}.\]
+
+          Let
+          \[j^{(1)}=[\ldots,j_n^{(1)},\ldots],\quad j^{(2)}=[\ldots,j_n^{(2)},\ldots],\quad\ldots\quad j^{(k)}=j^{(k+1)}=[\ldots,j_n^{(k)},\ldots],\]
+          then by A-Map, \(\steps{(a_i,j_{n}^{(i)})}{(a_{i+1},j_{n}^{(i+1)})}\) implies \(\steps{(|a_i,j^{(i)})}{(|a_{i+1},j^{(i+1)})}\). Therefore
+          \[\steps{(|a_1,j^{(1)})}{}\steps{(|a_2,j^{(2)})}{}\ldots\steps{}{(|a_k,j^{(k)})}.\]
+
+          Because \(a_k=\varepsilon\), by A-Map-Empty, \(\steps{(|a_k,j^{(k)})}{(\varepsilon,j^{(k)})}=(\varepsilon,j^{(k+1)})\).
+
+          Because \(j_{n}=j_{n}^{(1)}\), therefore \(j=[\ldots,j_n,\ldots]=[\ldots,j_n^{(1)},\ldots]=j^{(1)}\). Therefore the \(j^{(i)}\) satisfies equation (\ref{eq_map}).\qedhere
   \end{enumerate}
 \end{proof}
 
