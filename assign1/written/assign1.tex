@@ -98,7 +98,7 @@ Part 1:
 
   \ir{A-Dict}{j=\{s':j', \ldots\}}{\steps{ (.sa,j) }{ (a,j') } }
 
-  \ir{A-Index}{j=[\dots,j_n,\dots] }{\steps{ ([n]a,j) }{ (a',j_n) } }
+  \ir{A-Index}{j=[\dots,j_n,\dots] }{\steps{ ([n]a,j) }{ (a,j_n) } }
 
   \ir{A-Map-Empty}{ }{\steps{(|\varepsilon,j)}{(\varepsilon,j)}}
 
@@ -156,14 +156,6 @@ I made a stronger claim here so that the V-Map part can be proved clearly. The i
           Because \(j=[\dots,j_n,\dots]\), by A-Index, \(\steps{(a,j)}{(a',j_n)}=(a_1,j_n^{(1)})\).
 
           Therefore the theorem holds for \(a=[n]a'\) where \(a, a_1, a_2, \ldots, a_k\) described above is the set of accessors that satisfies the condition.
-    
-    \item If \(a=|\varepsilon\), by V-Terminate, for every \(\tau\), \(\matches{\varepsilon}{\tau}\).
-    
-          By V-Map, for every \(\tau\), \(a=\matches{|\varepsilon}{[\tau]}\).
-    
-          By A-Map-Empty, for every \(\tau\), for every \(j\) such that \(\matches{j}{[\tau]}\), \((a,j)=\steps{(|\varepsilon,j)}{(\varepsilon,j)}\).
-    
-          Therefore the theorem holds for \(a=|e\).
 
     \item Suppose that \(a=|a'\), \(\matches{a'}{\tau'}\), there exists accessors \(a_1, a_2, \ldots, a_k\) such that \(a_1 = a', a_k = \varepsilon\) and for all \(\matches{j}{\tau'}\), then there exists objects \(j_1, j_2, \ldots, j_k\) such that \(j_1=j\) and equation (\ref{eq_steps}) holds.
     

@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "webpack-dev-server -d --open",
+    "start": "NODE_OPTIONS=--openssl-legacy-provider webpack-dev-server -d --open",
     "build": "webpack",
     "format": "prettier --write src/**/*.js"
   },
