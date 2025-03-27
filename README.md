@@ -4,7 +4,7 @@
 
 ## OCaml code
 
-**Don't follow the instructions in the course's lab 1!** Instead, follow [the official guide](https://ocaml.org/docs/installing-ocaml) to install OCaml 5, then install all packages into your switch:
+I have ported most OCaml code to OCaml 5.x, so **don't follow the instructions in the course's lab 1!** Instead, follow [the official guide](https://ocaml.org/docs/installing-ocaml) to install OCaml 5, then install all packages into your switch:
 ```sh
 opam install core core_unix menhir utop merlin ocp-indent user-setup -y
 ```
@@ -20,3 +20,7 @@ The original assignment uses `corebuild`, which is obsolete and replaced by [dun
 ### Assignment 3
 
 [OCaml Core documentation](https://v3.ocaml.org/p/core/latest/doc/index.html)
+
+### Assignment 4
+
+I gave up writing this assignment in OCaml and [rewritten it in Rust](https://github.com/heanyang1/interpreter).

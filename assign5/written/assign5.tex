@@ -23,54 +23,24 @@
 % \wcall{i}
 % \wif{e_\msf{then}^*}{e_\msf{else}^*}
 % \wfor{e_\msf{init}^*}{e_\msf{cond}^*}{e_\msf{post}^*}{e_\msf{body}^*}
-% \wtry{e_\msf{try}^*}{e_\msf{raise}^*}
+% \wtry{e_\msf{try}^*}{e_\wraise^*}
 % \wraise
 
 \begin{document}
 
 \hwtitle
   {Assignment 5}
-  {Will Crichton (wcrichto)} %% REPLACE THIS WITH YOUR NAME/ID
+  {Anyang He (heanyang1)} %% REPLACE THIS WITH YOUR NAME/ID
 
-% Here's some complete examples of Latexing with WebAssembly.
-% Please delete this before submitting your homework.
-
+The T-Call and T-Return semantics that have problem displaying in \href{https://stanford-cs242.github.io/f19/lectures/05-2-control-flow#static-semantics-1}{the lecture note} probably look like:
 \begin{mathpar}
-\ir{D-Const}
-  {\ }
-  {\wsteps
-    {\wcs{:}~n^*; ~\wci{:}~(\wconst{n'}),e^*}
-    {\wcs{:}~n',n^*; ~\wci{:}~e^*}}
+\ir{T-Call}
+  {f = \ctx.\msf{funcs}[i]}
+  {\typeJC{\wcall{i}}{\tfun{f.\msf{params}}{f.\msf{return}}}}
 
-\ir{D-Binop}
-  {n' = n_L~\oplus~n_R}
-  {\wsteps
-    {\wcs{:}~n_L,n_R; ~\wci{:}~\wbinop{\oplus}}
-    {\wcs{:}~n'}}
-
-\ir{D-Label-Step}
-  {\wsteps
-    {C~\with~\wci{:}~e_\msf{body}^*; ~\wcs{:}~n^*}
-    {C'~\with~\wci{:}~e_\msf{body}'^*; ~\wcs{:}~n'^*}}
-  {\wsteps
-    {C~\with~\wci{:}~\wlabel{e_\msf{cont}^*}{(n^*;~e_\msf{body}^*)}}
-    {C'~\with~\wci{:}~\wlabel{e_\msf{cont}^*}{(n'^*;~e_\msf{body}'^*)}}}
-
-\ir{T-Const}
-  {\ }
-  {\typeJC{\wconst{n}}{\tfun{\eps}{\msf{i32}}}}
-
-\ir{T-Binop}
-  {\ }
-  {\typeJC{\wbinop{\oplus}}{\tfun{\msf{i32}, \msf{i32}}{\msf{i32}}}}
-
-\ir{T-Loop}
-  {\typeJC{e^*}{\tfun{\eps}{\eps}}}
-  {\typeJC{\wloop{e^*}}{\tfun{\eps}{\eps}}}
-
-\ir{T-Block}
-  {\typeJC{e^*}{\tfun{\eps}{\eps}}}
-  {\typeJC{\wblock{e^*}}{\tfun{\eps}{\eps}}}
+\ir{T-Return}
+  {\ctx.\msf{curfunc}.\msf{return} = \tau_\msf{ret}}
+  {\typeJC{\wreturn}{\tfun{\tau_1^*, \tau_\msf{ret}}{\tau_2^*}}}
 \end{mathpar}
 
 \problem{Problem 2}
@@ -78,35 +48,164 @@
 Part 1:
 
 \begin{mathpar}
-% Your answer here
+\ir{T-If}
+{\typeJC{e_{\msf{then}}^*}{\tfun{\tau_1^*}{\tau_2^*}} \s \typeJC{e_{\msf{else}}^*}{\tfun{\tau_1^*}{\tau_2^*}}}
+{\typeJC{\wif{e_{\msf{then}}^*}{e_{\msf{else}}^*}}{\tfun{\tau_1^*,\msf{i32}}{\tau_2^*}}}
+
+% the configuration may be changed (e.g. memory may be written) when stepping from \(e_\msf{then}^*\) to \(\eps\), so we use the verbose ``with'' notation here
+\ir{D-If-True}
+{\wsteps
+  {C~\with~\wci{:}~e_\msf{then}^*; ~\wcs{:}~n^*}
+  {C'~\with~\wci{:}~\eps; ~\wcs{:}~n'^*}\s x\neq 0}
+{\wsteps
+  {C~\with~\wci{:}~\wif{e_{\msf{then}}^*}{e_{\msf{else}}^*}; ~\wcs{:}~n^*,x}
+  {C'~\with~\wci{:}~\eps; ~\wcs{:}~n'^*}}
+
+\ir{D-If-False}
+{\wsteps
+  {C~\with~\wci{:}~e_\msf{else}^*; ~\wcs{:}~n^*}
+  {C'~\with~\wci{:}~\eps; ~\wcs{:}~n'^*}}
+{\wsteps
+  {C~\with~\wci{:}~\wif{e_{\msf{then}}^*}{e_{\msf{else}}^*}; ~\wcs{:}~n^*,0}
+  {C'~\with~\wci{:}~\eps; ~\wcs{:}~n'^*}}
+
 \end{mathpar}
 
 Part 2:
 
+We need to add a binary operation to define \(\msf{for}\) loop:
+\begin{alignat*}{1}
+  \msf{Binop}~\oplus ::= \qamp \oplus \\
+  \mid \qamp \msf{eq} \\
+\end{alignat*}
+
+A \(\msf{for}\) loop can be decomposed to a \(\msf{block}\) and a \(\msf{loop}\). Inside the \(\msf{for}\) loop,  \(\msf{br}~0\) means ``continue'',  \(\msf{br}~1\) means ``break'', and  \(\msf{br}~x+2\) where \(x\geq0\) goes to the label \(x\) outside the \(\msf{for}\) loop.
 \begin{mathpar}
-% Your answer here
+
+\ir{T-For}
+{
+  \typeJC{e_{\msf{init}}^*}{\tfun{\eps}{\eps}} \s
+  \typeJ{\{\Gamma~\with~\msf{labels}:\Gamma.\msf{labels}+2\}}{e_{\msf{cond}}^*}{\tfun{\eps}{\msf{i32}}} \\
+  \typeJ{\{\Gamma~\with~\msf{labels}:\Gamma.\msf{labels}+2\}}{e_{\msf{post}}^*}{\tfun{\eps}{\eps}} \s
+  \typeJ{\{\Gamma~\with~\msf{labels}:\Gamma.\msf{labels}+2\}}{e_{\msf{body}}^*}{\tfun{\eps}{\eps}}}
+{\typeJC{\wfor{e_{\msf{init}}^*}{e_{\msf{cond}}^*}{e_{\msf{post}}^*}{e_{\msf{body}}^*}}{\tfun{\eps}{\eps}}}
+
+\ir{D-For}
+{\ }
+{
+  \{\wci{:}~\wfor{e_{\msf{init}}^*}{e_{\msf{cond}}^*}{e_{\msf{post}}^*}{e_{\msf{body}}^*}\} \\
+  \mapsto\{\wci{:}~e_{\msf{init}}^*,(\msf{block}~(\msf{loop}~e_{\msf{cond}}^*,\msf{i32.const} 0,\msf{i32.eq},\msf{br\underbar{\ }if}~1,e_{\msf{body}}^*,e_{\msf{post}}^*,\msf{br\underbar{\ }if}~0))\}
+}
+
 \end{mathpar}
 
 Part 3:
 
+A \(\wraise\) should have the same type as labels (i.e. \(\tfun{\eps}{\eps}\)) so that it can exit labels without violating preservation, but it should consume an \(\msf{i32}\) as error number. My design choice is to add a administrative instruction that can store the error number while having type \(\tfun{\eps}{\eps}\):
+\begin{alignat*}{1}
+  \msf{Expression}~e ::= \qamp e \\
+  \mid \qamp \msf{unwind}\{n\}
+\end{alignat*}
+where \(n:\msf{i32}\).
 \begin{mathpar}
-% Your answer here
+\ir{T-Try}
+  {\typeJC{e^*_\msf{try}}{\tfun{\eps}{\eps}}\s\typeJC{e^*_\wraise}{\tfun{\msf{i32}}{\eps}}}
+  {\typeJC{\wtry{e^*_\msf{try}}{e^*_\wraise}}{\tfun{\eps}{\eps}}}
+
+\ir{T-Raise}
+  {\ }
+  {\typeJC{\wraise}{\tfun{\msf{i32}}{\eps}}}
+
+\ir{T-Unwind}
+  {\ }
+  {\typeJC{\msf{unwind}\{n\}}{\tfun{\msf{\eps}}{\eps}}}
+
+\ir{D-Try-Finish}
+  {\ }
+  {\steps{\{\wci{:}~\wtry{\eps}{e^*_\wraise}\}}{\{\}}}
+
+\ir{D-Try-Catch}
+  {\ }
+  {\steps{\{\wci{:}~\wtry{\msf{unwind}\{n\}}{e^*_\wraise}\}}{\{\wci{:}~\msf{i32.const}~n,e^*_\wraise\}}}
+
+\ir{D-Raise}
+  {\ }
+  {\steps{\{\wci{:}~\wraise;\wcs{:}~n\}}{\{\wci{:}~\msf{unwind}\{n\}\}}}
+
+\ir{D-Unwind}
+  {\ }
+  {\steps{\{\wci{:}~\wlabel{\underbar{\ }}{(\underbar{\ };\msf{unwind}\{n\},\underbar{\ })}\}}{\{\wci{:}~\msf{unwind}\{n\}\}}}
+  
+\ir{D-Unwind-Val}
+  {\ }
+  {\{\wci{:}~\msf{unwind}\{n\}\}\val{}}
 \end{mathpar}
+
+Now our \(\msf{unwind}\{n\}\) needs to exit function frame. The problem is functions can have arbitrary return type, and the return value is not ready when a \(\wraise\) happens. My (inelegant) solution is to add a ``dummy'' value for every type and use it as the return value in such cases:
+\begin{alignat*}{1}
+  \msf{Expression}~e ::= \qamp e \\
+  \mid \qamp \msf{dummy}\{\tau\}
+\end{alignat*}
+Since we only have \(\msf{i32}\) type and the function can only return one value, so these should be sufficient:
+\begin{mathpar}
+\ir{T-Dummy}
+  {\ }
+  {\typeJC{\msf{dummy}\{\tau\}}{\tau}}
+
+\ir{D-Dummy-I32}
+  {\ }
+  {\steps{\{\wci{:}~\msf{dummy}\{\msf{i32}\}\}}{\{\wcs{:}~42\}}}
+\end{mathpar}
+Then we can escape functions with any types by placing a \(\msf{dummy}\{\tau\}\) to pass preservation check (both sides have type \(\tfun{\eps}{\tau}\)):
+\begin{mathpar}
+\ir{D-Unwind-Return}
+  {C.\msf{module}.\msf{func}[i].\msf{return}=\tau}
+  {
+    \steps
+      {\{C~\with~\wci{:}~\wframe{i}{\{\wci{:}~\msf{unwind}\{n\},\underbar{\ }\}}\}}
+      {\{C~\with~\wci{:}~\msf{unwind}\{n\},\msf{dummy}\{\tau\}\}}
+  }
+\end{mathpar}
+
+Remark: it doesn't matter which value we use as \(\msf{dummy}\{\tau\}\) because it will never be used.
 
 \problem{Problem 3}
 
 Part 1:
 
 \begin{enumerate}
-\item \textbf{Undefined behavior:} % Your answer here
-\item \textbf{Private function call:} % Your answer here
+\item \textbf{Undefined behavior:} No. Our type system is independent on memory configuration (\(C.\msf{mem}\) is not involved in any of the static semantics) and the only difference between \(C\) and \(C'\) is \(C.\msf{mem}\neq C'.\msf{mem}\).
+\item \textbf{Private function call:} No. The only way to call function 0 is to issue \((\msf{call}~0)\). Since \(C.\msf{inst}\) does not contain \((\msf{call}~0)\) and \(C'.\msf{inst}=C.\msf{inst}\), \(C'.\msf{inst}\) does not contain \((\msf{call}~0)\) neither.
 \end{enumerate}
 
 Part 2:
 
 \begin{enumerate}
-\item \textbf{Undefined behavior:} % Your answer here
-\item \textbf{Private function call:} % Your answer here
+\item \textbf{Undefined behavior:} The answer is the same as part 1.
+\item \textbf{Private function call:} Here's an example where the attacker can use buffer overflow to call the private function 0:
+\begin{verbatim}
+(module
+  (func $a (param $x i32) (result i32)
+    (get_local $x)
+    (i32.const 1)
+    (i32.add))
+
+  (func $b (param $x i32) (result i32)
+    (get_local $x)
+    (i32.const 2)
+    (i32.add))
+
+  (func $main (result i32)
+    (i32.const 2)
+    (i32.const 1)
+    (i32.const 10)
+    (i32.store)
+    ;; use the first 40 bytes of the memory as buffer to do something
+    (i32.const 10)
+    (i32.load)
+    (call_indirect (param i32) (result i32)))
+)
+\end{verbatim}
 \end{enumerate}
 
 
