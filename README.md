@@ -24,3 +24,7 @@ The original assignment uses `corebuild`, which is obsolete and replaced by [dun
 ### Assignment 4
 
 I gave up writing this assignment in OCaml and [rewritten it in Rust](https://github.com/heanyang1/interpreter).
+
+### Assignment 6
+
+[Free access to the linear type paper](https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=24c850390fba27fc6f3241cb34ce7bc6f3765627)

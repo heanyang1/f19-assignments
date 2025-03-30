@@ -17,33 +17,22 @@
 
 \hwtitle
   {Assignment 6}
-  {Will Crichton (wcrichto)} %% REPLACE THIS WITH YOUR NAME/ID
+  {Anyang He (heanyang1)} %% REPLACE THIS WITH YOUR NAME/ID
 
 \problem{Problem 1.1}
 
 \begin{enumerate}
-\item % Your answer to 1.1.1 here
+\item In functional language, we usually use a function that takes in a variables representing the world and outputs a variable of the same kind to model something that changes the world. In functional languages without linear types, this model is flawed as we can not copy or discard the world, but we can do so to variables with normal types. However, we can model the world using linear types because a linear type variable can not be duplicated or discarded.
 
 \item
   \begin{enumerate} % Your answers to 1.1.2 here
-    \item
-    \item
-    \item
-    \item
+    \item \(\lfun{x}{\ltyprim{Bool}}{\ltyprim{True}}\) does not have a type because \(x\) is discarded.
+    \item \(\lfun {x}{\ltyprim{Bool}}{(\lcase{x}{\ltyprim{True} \rightarrow \ltyprim{False} \mid \ltyprim{False} \rightarrow \ltyprim{True}})}\) has type \(\ltyfun{\ltyprim{Bool}}{\ltyprim{Bool}}\).
+    \item \(\lfun {x}{\ltyprim{Bool}}{(\lcase{x}{\ltyprim{True} \rightarrow x \mid \ltyprim{False} \rightarrow \ltyprim{True}})}\) does not have a type because \(x\) may be used in both \(A\) and \(B\) in the type rule \(\ltyprim{}K\mathcal{E}\).
+    \item \(\lfun{l}{\ltyprim{List}}{
+      \lfun{f}{\ltyfun{\ltyprim{Val}}{\ltyprim{Val}}}
+      {\lcase{l}{\ltyprim{Nil} \rightarrow \ltyprim{Nil} \mid \ltyprim{Cons}~x~l' \rightarrow \ltyprim{Cons}~(\lapp{f}{x})~l'}}}\) has type \(\ltyfun{\ltyprim{List}}{}(\ltyfun{\ltyprim{Val}}{\ltyprim{Val}})\ltyfun{}{\ltyprim{List}}\).
   \end{enumerate}
 \end{enumerate}
-
-% Here's some examples of Latexing with Wadler's linear types.
-% DELETE THESE BEFORE SUBMITTING
-\begin{align*}
-&\lfun{x}{\ltyprim{Bool}}{\ltyprim{True}} \\
-&\lfun {x}{\ltyprim{Bool}}{(\lcase{x}{
-  \ltyprim{True} \rightarrow \ltyprim{False} \mid \ltyprim{False} \rightarrow \ltyprim{True}})} \\
-&\lfun {x}{\ltyprim{Bool}}{(\lcase{x}{
-  \ltyprim{True} \rightarrow x \mid \ltyprim{False} \rightarrow \ltyprim{True}})} \\
-&\lfun{l}{\ltyprim{List}}{
-  \lfun{f}{\ltyfun{\ltyprim{Val}}{\ltyprim{Val}}}
-  {\lcase{l}{\ltyprim{Nil} \rightarrow \ltyprim{Nil} \mid \ltyprim{Cons}~x~l' \rightarrow \ltyprim{Cons}~(\lapp{f}{x})~l'}}}
-\end{align*}
 
 \end{document}

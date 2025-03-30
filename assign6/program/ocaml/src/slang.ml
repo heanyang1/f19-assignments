@@ -28,7 +28,7 @@ let rec typecheck_expr
     tc var_set e1 >>= fun () -> tc var_set e2
 
   | Var x ->
-    if String.Set.mem var_set x then
+    if Set.mem var_set x then
       Ok ()
     else
       Error (Printf.sprintf "Variable %s is undefined or moved" x)
@@ -38,7 +38,7 @@ let rec typecheck_expr
       ~f:(fun res arg ->
         res >>= fun () -> tc var_set arg)
     >>= fun () ->
-    (match String.Map.find fn_map x with
+    (match Map.find fn_map x with
      | Some expected_args ->
        if List.length expected_args = List.length args then Ok ()
        else Error (Printf.sprintf
@@ -55,7 +55,7 @@ let typecheck_func (fn_map : string list String.Map.t) (f : func)
       (match s with
        | Assign (x, e) ->
          typecheck_expr fn_map var_set e
-         >>| fun () -> String.Set.add var_set x
+         >>| fun () -> Set.add var_set x
        | Return e ->
          typecheck_expr fn_map var_set e
          >>| fun () -> var_set))
