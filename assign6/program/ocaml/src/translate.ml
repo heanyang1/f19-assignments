@@ -1,8 +1,6 @@
 open Core
 
-exception Unimplemented
-
-let runtime_locals = ["s"]
+let runtime_locals = ["s"; "src1"; "src2"; "n1"; "n2"; "n"; "dst"]
 
 let rec translate_expr (e : Slang.expr) : Wasm.instr list =
   let open Wasm in
@@ -22,8 +20,19 @@ let rec translate_expr (e : Slang.expr) : Wasm.instr list =
     [GetLocal "s"; Const n]
 
   | Slang.Concat (e1, e2) ->
-    (* Your solution goes here! *)
-    raise Unimplemented
+    let stores1 = translate_expr e1 in
+    let stores2 = translate_expr e2 in
+    stores1 @ stores2 @
+    [
+      SetLocal "n2"; SetLocal "src2"; SetLocal "n1"; SetLocal "src1";
+      GetLocal "n1"; GetLocal "n2"; Binop `Add; SetLocal "n";
+      GetLocal "n"; Call "alloc"; SetLocal "dst";
+      GetLocal "src1"; GetLocal "dst"; GetLocal "n1"; Call "memcpy";
+      GetLocal "src2"; GetLocal "dst"; GetLocal "n1"; Binop `Add; GetLocal "n2"; Call "memcpy";
+      GetLocal "src1"; Call "dealloc";
+      GetLocal "src2"; Call "dealloc";
+      GetLocal "n"; GetLocal "dst";
+    ]
 
   | Slang.Call (x, es) ->
     (List.concat (List.map ~f:translate_expr es))

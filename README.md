@@ -19,7 +19,7 @@ The original assignment uses `corebuild`, which is obsolete and replaced by [dun
 
 ### Assignment 3
 
-[OCaml Core documentation](https://v3.ocaml.org/p/core/latest/doc/index.html)
+[OCaml Core documentation](https://ocaml.org/p/core/latest/doc/index.html)
 
 ### Assignment 4
 
