@@ -1,4 +1,4 @@
-use session::*;
+use crate::session::*;
 
 type Id = String;
 type AtmDeposit = Recv<u64, Send<u64, Var<Z>>>;

@@ -2,9 +2,10 @@
 name = "assign8"
 version = "0.1.0"
 authors = ["Will Crichton <wcrichto@cs.stanford.edu>"]
+edition = "2018"
 
 [dependencies]
-rand = "0.6.0-pre.1"
+rand = "0.8.5"
 
 [dev-dependencies]
 trybuild = "1.0"
