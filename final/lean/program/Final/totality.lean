@@ -1,6 +1,6 @@
-import .arith
-import .inversion
-import .evals
+import Final.arith
+import Final.inversion
+import Final.evals
 
 theorem totality : ∀ e : Expr, ∃ e' : Expr, val e' ∧ e ↦* e' :=
   begin

@@ -1,5 +1,5 @@
-import .arith
-import .inversion
+import Final.arith
+import Final.inversion
 
 -- Propositions used in the reference solution:
 -- val.DNat, or.intro_right, val_inversion, exists.elim, apply_binop, steps.*

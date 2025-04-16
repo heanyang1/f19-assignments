@@ -3,7 +3,7 @@ example : Binop := Binop.Add
 
 
 inductive Expr
-| Num : ℕ → Expr
+| Num : Nat → Expr
 | Binop : Binop → Expr → Expr → Expr
 -- Fill in Let and Var syntax
 
@@ -12,17 +12,17 @@ example : Expr := Expr.Binop Binop.Add (Expr.Num 1) (Expr.Num 2)
 
 
 inductive val : Expr → Prop
-| DNat (n : ℕ) : val (Expr.Num n)
+| DNat (n : Nat) : val (Expr.Num n)
 
 example : val (Expr.Num 2) := val.DNat 2
 
 
-def apply_binop (op : Binop) (nl nr : ℕ) : ℕ :=
-  Binop.cases_on op (nl + nr) (nl - nr) (nl * nr) (nl / nr)
+def apply_binop (op : Binop) (nl nr : Nat) : Nat :=
+  Binop.casesOn op (nl + nr) (nl - nr) (nl * nr) (nl / nr)
 
-inductive subst : ℕ → Expr → Expr → Expr → Prop
-| SNum (i n : ℕ) (e' : Expr) : subst i e' (Expr.Num n) (Expr.Num n)
-| SBinop (op : Binop) (i : ℕ) (el er el' er' e' : Expr) :
+inductive subst : Nat → Expr → Expr → Expr → Prop
+| SNum (i n : Nat) (e' : Expr) : subst i e' (Expr.Num n) (Expr.Num n)
+| SBinop (op : Binop) (i : Nat) (el er el' er' e' : Expr) :
   subst i e' el el' → subst i e' er er' →
   subst i e' (Expr.Binop op el er) (Expr.Binop op el' er')
 -- Fill in remaining substitution rules
@@ -38,27 +38,27 @@ inductive steps : Expr → Expr → Prop
   steps
     (Expr.Binop op el er)
     (Expr.Binop op el er')
-| DOp (op: Binop) (nl nr : ℕ) :
+| DOp (op: Binop) (nl nr : Nat) :
   steps
     (Expr.Binop op (Expr.Num nl) (Expr.Num nr))
     (Expr.Num (apply_binop op nl nr))
 -- Fill in D-Let step rule
 
-notation e `↦`:35 e' := steps e e'
+notation:35 e " ↦ " e' => steps e e'
 
 example : (Expr.Binop Binop.Add (Expr.Num 1) (Expr.Num 2)) ↦ (Expr.Num 3) :=
    steps.DOp Binop.Add 1 2
 
-inductive valid : ℕ → Expr → Prop
-| TNum (n i : ℕ) :
+inductive valid : Nat → Expr → Prop
+| TNum (n i : Nat) :
   valid i (Expr.Num n)
-| TBinop (op : Binop) (el er : Expr) (i : ℕ) :
+| TBinop (op : Binop) (el er : Expr) (i : Nat) :
   valid i el → valid i er → valid i (Expr.Binop op el er)
 -- Fill in T-Let and T-Var rules
 
 
-lemma subst_preserves_valid :
-  ∀ (e e' esub : Expr), ∀ (i : ℕ),
+theorem subst_preserves_valid :
+  ∀ (e e' esub : Expr), ∀ (i : Nat),
     valid (i+1) e → valid i e' → subst i e' e esub → valid i esub :=
   begin
   sorry -- Remove this line and add your proof
@@ -69,4 +69,3 @@ theorem preservation :
   begin
     sorry -- Remove this line and add your proof
   end
-
