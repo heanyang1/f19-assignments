@@ -60,12 +60,8 @@ inductive valid : Nat → Expr → Prop
 theorem subst_preserves_valid :
   ∀ (e e' esub : Expr), ∀ (i : Nat),
     valid (i+1) e → valid i e' → subst i e' e esub → valid i esub :=
-  begin
   sorry -- Remove this line and add your proof
-end
 
 theorem preservation :
   ∀ e e' : Expr, (e ↦ e') → valid 0 e → valid 0 e' :=
-  begin
-    sorry -- Remove this line and add your proof
-  end
+  sorry -- Remove this line and add your proof

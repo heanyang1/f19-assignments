@@ -3,11 +3,11 @@ import Final.inversion
 
 theorem progress : ∀ e : Expr, val e ∨ (∃ e', e ↦ e') := by
   intro e
-  match e with
-  | Expr.Num n =>
+  cases e
+  case Num n =>
     apply Or.inl
     apply val.DNat n
-  | Expr.Binop binop el er =>
+  case Binop binop el er =>
     apply Or.inr
     have hl: val el ∨ (∃ el', el ↦ el') := progress el
     have hr: val er ∨ (∃ er', er ↦ er') := progress er
@@ -21,16 +21,13 @@ theorem progress : ∀ e : Expr, val e ∨ (∃ e', e ↦ e') := by
         intro nl hl
         apply Exists.elim hrnum
         intro nr hr
-        simp [hl, hr]
-        have hstep: Expr.Binop binop (Expr.Num nl) (Expr.Num nr) ↦ Expr.Num (apply_binop binop nl nr) :=
-          (steps.DOp binop nl nr)
         exists Expr.Num (apply_binop binop nl nr)
+        simp [hl, hr]
+        apply steps.DOp binop nl nr
       . intro ⟨er', h⟩
         intro hval
-        have hstep: Expr.Binop binop el er ↦ Expr.Binop binop el er'
-          := (steps.DRight binop el er er') h hval
         exists Expr.Binop binop el er'
+        apply (steps.DRight binop el er er') h hval
     . intro ⟨el', h⟩
-      have hstep: Expr.Binop binop el er ↦ Expr.Binop binop el' er
-        := (steps.DLeft binop el el' er) h
       exists Expr.Binop binop el' er
+      apply (steps.DLeft binop el el' er) h
