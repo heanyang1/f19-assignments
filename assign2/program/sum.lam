@@ -10,9 +10,8 @@ if = fun p -> fun a -> fun b -> p a b
 
 fix = fun f -> (fun x -> f (x x)) (fun x -> f (x x))
 
-iszero = fun n -> n (fun p -> false) true
-improver = fun f -> fun n -> (iszero n) z (plus n (f (pred n)))
-sum = fun n -> fix improver n
+iszero = (* you might find it useful to define this helper function *)
+sum = (* put your answer here! *)
 
 sum z
 sum (s z)

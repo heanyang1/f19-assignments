@@ -19,35 +19,35 @@ let rec typecheck_expr
           (fn_map : string list String.Map.t)
           (var_set : String.Set.t)
           (e : expr)
-  : (String.Set.t, string) Result.t =
+  : (unit, string) Result.t =
   let tc = typecheck_expr fn_map in
   match e with
-  | String _ -> Ok var_set
+  | String _ -> Ok ()
 
   | Concat (e1, e2) ->
-    tc var_set e1 >>= fun new_var_set -> tc new_var_set e2
+    tc var_set e1 >>= fun () -> tc var_set e2
 
   | Var x ->
     if Set.mem var_set x then
-      Ok (Set.remove var_set x)
+      Ok ()
     else
       Error (Printf.sprintf "Variable %s is undefined or moved" x)
 
   | Call (x, args) ->
-    List.fold args ~init:(Ok var_set)
+    List.fold args ~init:(Ok ())
       ~f:(fun res arg ->
-        res >>= fun new_var_set -> tc new_var_set arg)
-    >>= fun new_var_set ->
+        res >>= fun () -> tc var_set arg)
+    >>= fun () ->
     (match Map.find fn_map x with
      | Some expected_args ->
-       if List.length expected_args = List.length args then Ok new_var_set
+       if List.length expected_args = List.length args then Ok ()
        else Error (Printf.sprintf
                      "List was given %d parameters, expected %d parameters"
                      (List.length expected_args) (List.length args))
      | None -> Error (Printf.sprintf "Called undefined function %s" x))
 
 let typecheck_func (fn_map : string list String.Map.t) (f : func)
-  : (String.Set.t, string) Result.t =
+  : (unit, string) Result.t =
   List.fold f.body
     ~init:((Ok (String.Set.of_list f.params)))
     ~f:(fun var_set_res s ->
@@ -55,12 +55,11 @@ let typecheck_func (fn_map : string list String.Map.t) (f : func)
       (match s with
        | Assign (x, e) ->
          typecheck_expr fn_map var_set e
-         >>| fun new_var_set -> Set.add new_var_set x
+         >>| fun () -> Set.add var_set x
        | Return e ->
-         typecheck_expr fn_map var_set e))
-  >>= fun end_var_set -> match Set.choose end_var_set with
-   | None -> Ok String.Set.empty
-   | Some x -> Error (Printf.sprintf "variable %s is unused" x)
+         typecheck_expr fn_map var_set e
+         >>| fun () -> var_set))
+  >>| fun _ -> ()
 
 let typecheck (p : prog) : (unit, string) Result.t =
   let fn_map =
@@ -68,6 +67,4 @@ let typecheck (p : prog) : (unit, string) Result.t =
   in
   List.fold p
     ~init:(Ok ())
-    ~f:(fun acc f -> acc >>= fun () -> typecheck_func fn_map f >>= fun end_var_set -> match Set.choose end_var_set with
-    | None -> Ok ()
-    | Some x -> Error (Printf.sprintf "variable %s is unused" x))
+    ~f:(fun acc f -> acc >>= fun () -> typecheck_func fn_map f)
