@@ -10,17 +10,11 @@ theorem totality : ∀ e : Expr, ∃ e' : Expr, val e' ∧ e ↦* e' := by
     apply And.intro (val.DNat n) (evals_refl (Expr.Num n))
   case Binop op el er ihl ihr =>
     -- left IH
-    apply Exists.elim ihl
-    intro el_val hl
-    have hll: ∃ n : Nat, el_val = Expr.Num n := val_inversion el_val hl.left
-    apply Exists.elim hll
-    intro nl hnl
+    rcases ihl with ⟨el_val, hl⟩
+    rcases val_inversion el_val hl.left with ⟨nl, hnl⟩
     -- right IH
-    apply Exists.elim ihr
-    intro er_val hr
-    have hrl: ∃ n : Nat, er_val = Expr.Num n := val_inversion er_val hr.left
-    apply Exists.elim hrl
-    intro nr hnr
+    rcases ihr with ⟨er_val, hr⟩
+    rcases val_inversion er_val hr.left with ⟨nr, hnr⟩
     -- the `e'`
     exists Expr.Num (apply_binop op nl nr)
     -- prove `val e' ∧ e ↦* e'`

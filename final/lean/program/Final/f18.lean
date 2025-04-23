@@ -96,14 +96,3 @@ section part4
     ⟩
 
 end part4
-
-open Nat
-
-example (n : Nat) (h : n ≠ 0) : succ (pred n) = n := by
-  cases n with
-  | zero =>
-    -- goal: h : 0 ≠ 0 ⊢ succ (pred 0) = 0
-    apply absurd rfl h
-  | succ m =>
-    -- second goal: h : succ m ≠ 0 ⊢ succ (pred (succ m)) = succ m
-    rfl

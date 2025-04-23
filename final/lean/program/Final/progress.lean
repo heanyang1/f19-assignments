@@ -3,24 +3,18 @@ import Final.inversion
 
 theorem progress : ∀ e : Expr, val e ∨ (∃ e', e ↦ e') := by
   intro e
-  cases e
+  induction e
   case Num n =>
     apply Or.inl
     apply val.DNat n
-  case Binop binop el er =>
+  case Binop binop el er ihl ihr =>
     apply Or.inr
-    have hl: val el ∨ (∃ el', el ↦ el') := progress el
-    have hr: val er ∨ (∃ er', er ↦ er') := progress er
-    apply Or.elim hl
-    . apply Or.elim hr
+    apply Or.elim ihl
+    . apply Or.elim ihr
       . intro hrval
         intro hlval
-        have hlnum: ∃ n : Nat, el = Expr.Num n := val_inversion el hlval
-        have hrnum: ∃ n : Nat, er = Expr.Num n := val_inversion er hrval
-        apply Exists.elim hlnum
-        intro nl hl
-        apply Exists.elim hrnum
-        intro nr hr
+        rcases val_inversion el hlval with ⟨nl, hl⟩
+        rcases val_inversion er hrval with ⟨nr, hr⟩
         exists Expr.Num (apply_binop binop nl nr)
         simp [hl, hr]
         apply steps.DOp binop nl nr
