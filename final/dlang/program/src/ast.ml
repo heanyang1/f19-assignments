@@ -1,4 +1,5 @@
 open Core
+open Poly
 
 type symbol = string
 [@@deriving sexp_of, sexp, compare]

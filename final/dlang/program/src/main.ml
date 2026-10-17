@@ -52,6 +52,6 @@ let main () =
         else
           interpret filepath
     ]
-  |> Command.run
+  |> Command_unix.run
 
 let () = main ()

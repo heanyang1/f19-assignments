@@ -1,4 +1,5 @@
 open Core
+open Poly
 
 exception Unimplemented
 

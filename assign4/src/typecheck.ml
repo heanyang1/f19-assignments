@@ -1,5 +1,6 @@
 open Flags
 open Core
+open Poly
 open Result.Monad_infix
 open Ast
 

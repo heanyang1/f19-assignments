@@ -1,0 +1,7 @@
+(executables
+ (names exercise1 exercise2)
+ (libraries core))
+
+(env
+ (dev
+  (flags (:standard -warn-error -A))))

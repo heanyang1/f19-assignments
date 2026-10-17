@@ -1,10 +1,22 @@
 const module_srcs = [
-    require("buffer-loader!./basic.wat"),
-    require("buffer-loader!./concat.wat"),
-    require("buffer-loader!./funcall.wat"),
+    require("./basic.wat"),
+    require("./concat.wat"),
+    require("./funcall.wat"),
 ];
 const wabt = require("wabt")();
 const getTests = require("./tests");
+
+// webpack 5 serves these as URLs (see asset/resource rules in webpack.config.js);
+// we fetch and instantiate them ourselves.
+import memcpy_url from "./memcpy.wasm";
+import wasm_alloc_url from "../wasm-alloc/wasm_alloc_bg.wasm";
+
+async function instantiate (url) {
+  const resp = await fetch(url);
+  const bytes = await resp.arrayBuffer();
+  const { instance } = await WebAssembly.instantiate(bytes, {});
+  return instance.exports;
+}
 
 // Utility function that returns a delay promise.
 const delay = t => new Promise(resolve => setTimeout(resolve, t));
@@ -48,7 +60,7 @@ var memory = null;
 // done so that we can get a fresh allocator context each time.
 const getModule = () =>
   Promise
-    .all([binaries, import('wasm-alloc'), import('./memcpy.wasm')])
+    .all([binaries, instantiate(wasm_alloc_url), instantiate(memcpy_url)])
     .then(([buffers, wasm_alloc_, memcpy]) => {
       wasm_alloc = wasm_alloc_;
       memory = memcpy.memory;

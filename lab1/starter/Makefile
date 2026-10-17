@@ -1,13 +1,16 @@
-all: exercise1.native exercise2.native
+all: exercise1 exercise2
 
-BUILD = corebuild
-FLAGS = -use-ocamlfind
+exercise1: always
+	dune build
+	rm -f exercise1 && cp ../_build/default/starter/exercise1.exe exercise1
 
-%.native: always
-	$(BUILD) $(FLAGS) $@
+exercise2: always
+	dune build
+	rm -f exercise2 && cp ../_build/default/starter/exercise2.exe exercise2
 
 clean:
-	rm -rf *.native *.top _build
+	dune clean
+	rm -f exercise1 exercise2
 
 always:
 

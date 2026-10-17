@@ -34,6 +34,6 @@ let main () =
         set_testing testing;
         run filepath
     ]
-  |> Command.run
+  |> Command_unix.run
 
 let () = main ()

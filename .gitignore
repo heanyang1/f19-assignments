@@ -14,3 +14,10 @@ _minted*
 *.log
 *.out
 *.synctex.gz
+# dune build copies (assign4, assign6, dlang)
+main.native
+main.byte
+
+# lab1 build copies
+exercise1
+exercise2

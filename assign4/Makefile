@@ -1,17 +1,17 @@
 all: main.native
 debug: main.byte
 
-BUILD = corebuild
-FLAGS = -use-ocamlfind -use-menhir
+main.native: always
+	dune build src/main.exe
+	rm -f main.native && cp _build/default/src/main.exe main.native
 
-%.byte: always
-	$(BUILD) $(FLAGS) src/$@
-
-%.native: always
-	$(BUILD) $(FLAGS) src/$@
+main.byte: always
+	dune build --profile dev src/main.exe
+	rm -f main.byte && cp _build/default/src/main.exe main.byte
 
 clean:
-	rm -rf main.byte main.native *.top _build
+	dune clean
+	rm -f main.native main.byte
 
 always:
 

@@ -8,10 +8,15 @@ module.exports = {
     path: path.resolve(__dirname, "dist"),
     filename: "bundle.js",
   },
-  node: {
-    fs: 'empty'
-  },
   mode: "development",
+  module: {
+    rules: [
+      { test: /\.wat$/, type: "asset/source" },
+    ],
+  },
+  resolve: {
+    fallback: { fs: false },
+  },
   plugins: [
     new HtmlWebpackPlugin({
       template: 'src/index.html'

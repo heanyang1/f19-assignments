@@ -1,1 +1,5 @@
 node_modules
+dist
+/src/basic.wat
+/src/concat.wat
+/src/funcall.wat

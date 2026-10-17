@@ -1,4 +1,4 @@
-const wat = require("buffer-loader!./mystery.wat");
+const wat = require("./mystery.wat");
 const wabt = require("wabt")();
 const getTests = require("./tests");
 

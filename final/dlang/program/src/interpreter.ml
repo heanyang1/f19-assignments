@@ -1,5 +1,6 @@
 open Flags
 open Core
+open Poly
 open Result.Monad_infix
 open Ast
 open Builtins
@@ -100,9 +101,9 @@ let rec eval_expr (e : Expr.t) (vctx : var_ctx) (fctx : func_ctx)
     | Some (Error err) -> Error err
     | None -> Ok (List.map args_reduced ~f:(fun e -> Option.value_exn (Result.ok e))))
     >>= fun args_red ->
-    let (arg_decls, stmt_list) = String.Map.find_exn fctx name in
+    let (arg_decls, stmt_list) = Map.find_exn fctx name in
     let arg_ctx = String.Map.of_alist_exn (List.zip_exn (List.map arg_decls ~f:(fun (n, _) -> n)) args_red) in
-    let new_vctx = String.Map.merge vctx arg_ctx ~f:(fun ~key:_ v ->
+    let new_vctx = Map.merge vctx arg_ctx ~f:(fun ~key:_ v ->
       match v with
       | `Left v1 -> Some(v1)
       | `Both (_, v2)
@@ -135,7 +136,7 @@ let rec eval_expr (e : Expr.t) (vctx : var_ctx) (fctx : func_ctx)
       | Expr.Addcol -> addcol tensor idx item_to_add)
     )
 
-  | Expr.Var {name} -> Ok (String.Map.find_exn vctx name)
+  | Expr.Var {name} -> Ok (Map.find_exn vctx name)
   | Expr.Int _ -> Ok e
   | Expr.Float _ -> Ok e
 
@@ -143,9 +144,9 @@ and eval_stmt (s : Stmt.t) (vctx : var_ctx) (fctx : func_ctx)
   : (Expr.t option * var_ctx * func_ctx, string) Result.t =
   match s with
   | Stmt.FuncDef {name; args; stmt_list} ->
-    Ok (None, vctx, String.Map.set fctx ~key:name ~data:(args, stmt_list))
+    Ok (None, vctx, Map.set fctx ~key:name ~data:(args, stmt_list))
   | Stmt.VarAssign {name; value} -> eval_expr value vctx fctx >>= fun res ->
-    Ok (Some res, String.Map.set vctx ~key:name ~data:res, fctx)
+    Ok (Some res, Map.set vctx ~key:name ~data:res, fctx)
   | Stmt.ExprStmt e -> eval_expr e vctx fctx >>= fun res ->
     Ok (Some res, vctx, fctx)
 

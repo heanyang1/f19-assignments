@@ -1,0 +1,15 @@
+(executable
+ (name main)
+ (libraries core core_unix.command_unix)
+ (preprocess
+  (pps ppx_let ppx_jane)))
+
+(menhir
+ (modules grammar))
+
+(ocamllex
+ (modules lexer))
+
+(env
+ (dev
+  (flags (:standard -warn-error -A))))
